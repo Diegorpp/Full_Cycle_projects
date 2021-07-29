@@ -39,7 +39,9 @@ Para rodar o kind é importante ter tanto o docker para que funcione as coisas, 
 - delete
 - get
 
-    kind create cluster
+    kind create cluster - 
+    kind get clusters - lista os clusters
+    kind delete clusters <cluster_name> - Deleta um cluster
 
 Por padrão o kind cria apenas um nó.
 
@@ -47,7 +49,40 @@ Por padrão o kind cria apenas um nó.
 
     kubectl cluster-info --context kind-kind
 
+Criar um arquivo kind.yaml onde será feita a configuração de como ficara o cluster.
+
+### Criando cluster via YAML
+
+É possível declarar o cluster utilizando um arquivo de manifesto, segue abaixo um exemplo de especificação para um cluster com 1 master e 3 workers.
+
+```yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4 #Fixo do kind
+
+nodes: # Vai possuir 4 nós
+- role: control-plane #Cara que vai gerenciar o kubernets
+- role: worker
+- role: worker
+- role: worker
+```
+
+Para executar o comando acima faça:
+    kind create cluster --config=file_name.yaml --name=cluster_name
+
 ### Comandos uteis kubectl
 
-- kubectl get nodes - Mostra todos os nodes do cluster kubernets
+- kubectl get nodes - Mostra todos os nodes do cluster 
+kubernets
+
+O contexto é importante ser definido pois os comandos como por exemplo o kubeset get nodes busca diretamente no contexto, ou seja ele não mostra de fato todos os nodes.
+
+    kubectl config get-clusters - Lista os clusters que existem no sistema.
+    kubectl config use-context <context> - Troca o contexto do cluster para que os comandso sejam executados em outro contexto.
+
+
+
+
+### Para ambiente de produção
+
+Para ter estabilidade no ambiente de produção é interessante ter um build multi-master, ou seja mais de um control-plane por cluster para evitar ter ponto de falha se o master morrer.
 

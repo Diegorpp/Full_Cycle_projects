@@ -1,0 +1,8 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4 #Fixo do kind
+
+nodes: # Vai possuir 4 nós
+- role: control-plane #Cara que vai gerenciar o kubernets
+- role: worker
+- role: worker
+- role: worker

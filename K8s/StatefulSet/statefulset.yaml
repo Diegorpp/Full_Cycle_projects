@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+spec:
+  serviceName: mysql-h
+  #podManagementPolicy: Parallel
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mysqç
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+            value: root
+# spec:
+#   accessModes: [ "ReadWriteOnce" ]
+#   resources:
+#     requests:
+#       storage: 1Gi

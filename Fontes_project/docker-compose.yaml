@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  kali_app:
+    build: .
+    container_name: fontes_project
+    ports:
+      - "9000:9000"
+    volumes:
+      - .:/app
+  

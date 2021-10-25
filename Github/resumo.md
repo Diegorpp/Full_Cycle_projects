@@ -79,6 +79,23 @@ O parâmetro "--global" indica que irá assinar assim para todos os repositorios
     git config --global commit.tagSign true
 ```
 
+## Boas praticas
+
+Mudar em configuração a branch para develop, dessa forma evita que commits sejam feitos na master caso alguem clonou e por alguma razão não alterou a branch.
+
+É possível criar novas regras de proteção de branch.
+```
+    feature/*
+```
+Regra se aplica a todas as branches que começam com feature/
+
+É possível exigit que os commits sejam assinados, é possível restringir usuarios ou grupos para poder commitar em uma determinada branch
+
+O Ideal é proteger os projetos de commits diretos na develop e na master, dessa forma a unica possibilidade de alteração seria utilizando.
+
+O processo de proteção de branches que restringe quem poderá realizar o push é uma funcionalidade que está disponível apenas para repositórios associados a uma organização no Github (o que é o mais comum quando trabalhamos com github em uma empresa).
+
+Logo, se você não estiver vendo a opção: "Restrict who can push to matching branches" e quiser testar o recurso, crie uma organização no Github e crie um repositório associado a ela.
 
 
 

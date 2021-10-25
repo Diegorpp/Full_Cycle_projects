@@ -81,8 +81,114 @@ O contexto é importante ser definido pois os comandos como por exemplo o kubese
 
 
 
-
 ### Para ambiente de produção
 
 Para ter estabilidade no ambiente de produção é interessante ter um build multi-master, ou seja mais de um control-plane por cluster para evitar ter ponto de falha se o master morrer.
+
+
+## Namespace
+
+O namespace permite uma separação lógica da aplicação dessa forma é possível setar:
+- permissão por usuario
+- Limite de recurso por namespace
+
+É normalmente utilizado para separação entre projetos e é recomendado que o ambiente de dev fique em um cluster separado.
+
+### Comandos uteis
+
+    kubectl get ns - lista todos os namespaces.
+    kubectl create ns <nome> - cria um namespace.
+    kubectl set-context --namespace=<nome> - Muda o contexto atual para o namespace informado.
+
+    kubectl apply -f <yaml_file> -n=<namespace_name> - executa o arquivo de manifesto no namespace informado.
+
+    kubectl get view - mostra um conjunto de informações do cluster
+
+É possível inserir o namespace também no arquivo de manifesto, o que é mais seguro que deixar para colocar no comando.
+
+No k8s é possível criar varios contextos diferentes com isso entrando no cluster com uma pré-configuração. 
+
+    kubectl config current-context - Mostra o contexto atual
+    kubectl config set-context dev --namespace=dev --cluster=<cluster_name> --user=<usuario>
+    kubectl config use-context dev - muda para o contexto solicitado.
+
+#### Service account
+
+Atribuir uma conta de serviço para um pod dessa forma ele fica limitado as permissões. <br>
+Se não criar isso e uam aplicação for invadida é possível escalar privilégio dentro do cluster e VRAU.
+
+    kubectl get serviceaccounts - lista todos os services account do cluster.
+
+É recomendado criar uma pelo menos por projeto.
+
+O service account padrão mapeia um diretório dentro de cada instancia para saber o grau de permissão da aplicação, dessa forma se alguem invadir a aplicação é possível ler as credenciais do cluster e executar comando pra API do k8s, para evitar isso é importante trocar o serviceaccount.
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: server
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: server-read
+rules:
+  - apiGroups: [""] #Determina quais os recursos ele pode acessar.
+    resources: ["pods","services"] #Tipos de serviços que ele podem acessar.
+    verbs: ["get","watch","list"] #São os comandos que podem ser executados nos recursos acima.
+  - apiGroups: ["apps"] #Determina quais os recursos o deployments pode usar.
+    resources: ["deployments"] #Tipos de serviços que ele podem acessar.
+    verbs: ["get","watch","list"] #São os comandos que podem ser executados nos recursos acima.
+
+--- 
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: server-read-bind
+subjects:
+  - kind: ServiceAccount
+    name: server
+    #namespace: prod
+  roleRef:
+    kind: Role
+    name: server-read
+    apiGroups: rbac.authorization.k8s.io
+
+
+```
+
+A Role é responsável por atribuir as permissões do serviceaccount;
+
+Para verificar as APIs de cada serviço é possível utilizar o comando abaixo
+
+    kubectl api-resources
+
+Após criar o serviceaccount e a Role é necessário "bindar" a Role ao service.
+
+Após a criação de tudo isso ainda é necessário associar essas informações ao Deployment. Para fazer isso dentro da especificação do dpeloyment em specs.templates.spec.serviceAccount deve estar referenciado corretamente.
+
+É possível fazer as regras em nivel de cluster utilizando "ClusterRole", "ClusterRoleBinding" para que as permissões funcionam entre os namespaces.
+
+[Codigos do curso](https://github.com/codeedu/fc2-k8s)
+
+## Service Mesh - Istio
+
+É uma camada extra adiciona junto a seu cluster para monitorar e modificar em tempo real o trafego das aplicações, bem como elevar o nível de segurança e confiabilidade de todo ecossistema.
+
+Istio é um projeto open-source que implementa service mesh visando diminuir a complexidade no gerenciamento de aplicações distribuidas independente de qual linguagem ou tecnologia elas foram desenvolvidas.
+
+- Roda em cima de diversas soluções.
+
+É possível rodar ele em cima do kubernets, Apache Mesos("Concorrente do k8s + algumas features), Consul(Service Discovery) e Nomad(Hashcorp). 
+
+
+
+
+
+
+
 
